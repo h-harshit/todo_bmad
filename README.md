@@ -1,333 +1,241 @@
-# Todo App - Full Stack Implementation
+# ToDo — BMAD-Driven Full-Stack Implementation
 
-A modern, full-stack todo application built with React 19, FastAPI, and SQLModel. Includes comprehensive test coverage with 64 passing tests (18 backend integration tests + 46 frontend component tests).
+A personal task management app — three columns (To do / In progress / Done), per-user authentication, drag-and-drop, no collaboration overhead.
 
-## ✅ Status
+Built end-to-end using the **BMAD Methodology**: PRD → Architecture → UX → Epics → Implementation Readiness gate → Implementation → QA audits.
 
-- **Backend**: 18 integration tests passing ✅
-- **Frontend**: 46 component tests passing ✅
-- **Docker**: Both images built and ready ✅
-- **Setup**: All dependencies installed and configured ✅
+## At a glance
 
-## 🚀 Quick Start
+| | |
+|---|---|
+| Backend | FastAPI 0.128, SQLModel 0.0.14, Pydantic v2, JWT in HTTP-only cookies, bcrypt |
+| Frontend | React 19, React Router 7, Tailwind 4, Vite 8 |
+| Tests | **18** pytest integration · **45** vitest component · **19** Playwright E2E (incl. **5** a11y) |
+| Coverage | Backend **90%** · Frontend **85%** |
+| Lighthouse (prod) | **Perf 100** · A11y **96** · Best Practices **96** |
+| WCAG | **0 critical / serious violations** at AA |
+| Container | Multi-stage Dockerfiles, non-root users, healthchecks, dev/prod/test profiles |
 
-### Option 1: Docker (Recommended)
+## Quick start
+
+### Run with Docker (recommended)
 ```bash
-docker-compose up
+docker-compose --profile dev up
+# frontend: http://localhost:5173
+# backend:  http://localhost:8000  (health: /health)
 ```
-- Backend: http://localhost:8000
-- Frontend: http://localhost:5173
 
-### Option 2: Local Development
-**Terminal 1 - Backend**:
+Click **Sign up** at the bottom of the login form, enter any email + password, and you're in.
+
+### Other profiles
+```bash
+docker-compose --profile prod up                            # multi-stage prod build
+docker-compose --profile test run --rm backend-test         # backend pytest in container
+```
+
+### Run locally without Docker
+
+**Backend**
 ```bash
 cd backend
+pip install -r requirements.txt
 python3 -m uvicorn app.main:app --reload
 ```
 
-**Terminal 2 - Frontend**:
+**Frontend**
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
-Then open http://localhost:5173
+## Test commands
 
-## 📋 Features
-
-✅ User authentication (login/logout)
-✅ Task management (create, read, update, delete)
-✅ Task workflow (TODO → IN PROGRESS → DONE)
-✅ User-scoped data access
-✅ Responsive design with Tailwind CSS
-✅ Comprehensive test coverage
-✅ Type-safe code (TypeScript + Pydantic)
-✅ Docker ready
-✅ JWT authentication with HTTP-only cookies
-
-## 📚 Documentation
-
-- **[QUICKSTART.md](./QUICKSTART.md)** - Quick reference guide
-- **[SETUP.md](./SETUP.md)** - Detailed setup and troubleshooting
-- **[DOCKER_GUIDE.md](./DOCKER_GUIDE.md)** - Docker configuration and troubleshooting
-- **[FIXES.md](./FIXES.md)** - What was fixed (email-validator, PostgreSQL → SQLite)
-- **[TEST_SUMMARY.md](./TEST_SUMMARY.md)** - Detailed test coverage report
-- **[IMPLEMENTATION_CHECKLIST.md](./IMPLEMENTATION_CHECKLIST.md)** - Complete feature checklist
-
-## 🏗️ Architecture
-
-### Backend (FastAPI)
-- **API**: RESTful endpoints with proper HTTP status codes
-- **Database**: SQLite (configurable for PostgreSQL)
-- **Auth**: JWT tokens in HTTP-only cookies
-- **Validation**: Pydantic v2
-- **Testing**: pytest with integration tests
-
-### Frontend (React 19)
-- **UI**: React components with TypeScript
-- **Styling**: Tailwind CSS
-- **Routing**: React Router v7
-- **State**: Context API
-- **Testing**: Vitest with component tests
-
-## 🧪 Testing
-
-### Run All Tests
 ```bash
-# Backend
-cd backend && python3 -m pytest tests/ -v
+# Backend integration tests + coverage
+cd backend && python3 -m pytest tests/
 
-# Frontend
+# Frontend unit / component tests
 cd frontend && npm test
 
-# Both
-python3 -m pytest tests/ -v && npm test
+# Frontend coverage report (HTML in coverage/)
+cd frontend && npm run test:coverage
+
+# E2E + accessibility (stack must be running)
+cd frontend && npm run test:e2e
+
+# E2E in interactive UI mode
+cd frontend && npm run test:e2e:ui
 ```
 
-### Test Results
-- Backend: 18 tests (7 auth, 11 tasks)
-- Frontend: 46 tests (5 modules with component tests)
-- **Total: 64 tests passing ✅**
-
-## 🔧 Technology Stack
-
-**Backend**
-- FastAPI 0.128.0
-- SQLModel 0.0.14
-- Pydantic 2.13.3
-- pytest 7.4.4
-- Python 3.9+
-
-**Frontend**
-- React 19
-- React Router 7
-- Tailwind CSS
-- Vitest 4.1.5
-- TypeScript
-- Node.js 18+
-
-**DevOps**
-- Docker & Docker Compose
-- SQLite (dev) / PostgreSQL (optional)
-
-## 📂 Project Structure
+## Repository layout
 
 ```
-todo_bmad/
-├── backend/
+.
+├── backend/                                # FastAPI app
 │   ├── app/
-│   │   ├── api/          # Route handlers
-│   │   ├── services/     # Business logic
-│   │   ├── models/       # Database models
-│   │   ├── schemas/      # Request/response schemas
-│   │   ├── config.py     # Configuration
-│   │   ├── dependencies.py
-│   │   └── main.py       # FastAPI app
-│   ├── tests/            # Integration tests
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── .env              # Configuration (created)
-│   └── conftest.py       # Test fixtures
+│   │   ├── api/                            # auth_router, task_router
+│   │   ├── services/                       # auth_service (JWT/bcrypt), task_service (user-scoped)
+│   │   ├── models/                         # SQLModel: User, Task
+│   │   ├── schemas/                        # Pydantic request/response
+│   │   ├── dependencies.py                 # get_current_user, get_session
+│   │   ├── config.py
+│   │   └── main.py                         # FastAPI app, CORS, /health
+│   ├── tests/                              # pytest integration tests
+│   ├── conftest.py                         # in-memory SQLite fixture
+│   ├── Dockerfile                          # multi-stage prod
+│   ├── Dockerfile.dev                      # bind-mount + --reload
+│   ├── pytest.ini                          # coverage configured (≥70% gate)
+│   └── requirements.txt
 │
-├── frontend/
+├── frontend/                               # React 19 + Vite + Tailwind v4
 │   ├── src/
-│   │   ├── pages/        # Page components
-│   │   ├── components/   # UI components
-│   │   ├── context/      # State management
-│   │   ├── api/          # API client
-│   │   ├── types.ts      # TypeScript types
-│   │   └── main.tsx
-│   ├── package.json
-│   ├── Dockerfile
-│   ├── vitest.config.ts
-│   ├── .env              # Configuration (created)
-│   └── tsconfig.json
+│   │   ├── pages/                          # LoginPage, BoardPage
+│   │   ├── components/                     # TaskCard, BoardColumn, ProtectedRoute
+│   │   ├── context/                        # authContext
+│   │   ├── api/api.ts                      # fetch wrapper, throws on non-2xx
+│   │   ├── types/                          # User, Task
+│   │   ├── App.tsx, main.tsx, index.css
+│   ├── e2e/                                # Playwright tests
+│   │   ├── auth.spec.ts
+│   │   ├── tasks.spec.ts
+│   │   ├── drag-and-drop.spec.ts
+│   │   ├── accessibility.spec.ts
+│   │   └── helpers.ts
+│   ├── Dockerfile                          # multi-stage: vite build → nginx
+│   ├── Dockerfile.dev
+│   ├── nginx.conf                          # SPA fallback, asset caching
+│   ├── playwright.config.ts
+│   ├── vitest.config.ts                    # coverage thresholds
+│   ├── tailwind.config.js, postcss.config.js
+│   └── package.json
 │
-├── docker-compose.yml
-├── .env.example          # Reference template
-├── README.md             # This file
-├── QUICKSTART.md         # Quick reference
-├── SETUP.md              # Setup guide
-├── DOCKER_GUIDE.md       # Docker guide
-├── FIXES.md              # What was fixed
-└── TEST_SUMMARY.md       # Test report
+├── _bmad-output/
+│   ├── planning-artifacts/                 # BMAD specs (frozen + version-controlled)
+│   │   ├── prd.md
+│   │   ├── architecture.md
+│   │   ├── ux-design-specification.md
+│   │   ├── epics.md
+│   │   └── implementation-readiness-report-2026-04-29.md
+│   └── qa-reports/                         # Phase 4 audits
+│       ├── coverage-report.md
+│       ├── accessibility-report.md
+│       ├── performance-report.md
+│       ├── security-review.md
+│       ├── ai-integration-log.md
+│       └── bmad-process.md
+│
+├── docker-compose.yml                      # dev / prod / test profiles
+├── .env.example
+└── README.md                               # this file
 ```
 
-## 🔐 Security Features
+## Architecture summary
 
-- ✅ Password hashing with bcrypt
-- ✅ JWT tokens in HTTP-only cookies
-- ✅ User-scoped data access (service layer)
-- ✅ CORS configured
-- ✅ Input validation with Pydantic
-- ✅ SQL injection prevention (SQLModel/SQLAlchemy)
-
-## 🐛 Recent Fixes
-
-### Fixed Issues
-1. **email-validator import error**
-   - Added explicit installation in Dockerfile
-   - Updated requirements.txt
-
-2. **PostgreSQL configuration issue**
-   - Switched from PostgreSQL to SQLite for development
-   - Simplified docker-compose.yml
-   - Updated backend config.py
-
-3. **Missing environment files**
-   - Created backend/.env
-   - Created frontend/.env
-   - Created .env.example
-
-See [FIXES.md](./FIXES.md) for details.
-
-## 📝 API Endpoints
-
-### Authentication
-- `POST /auth/login` - Login
-- `POST /auth/logout` - Logout
-- `GET /auth/me` - Current user
-
-### Tasks
-- `GET /tasks` - List tasks
-- `POST /tasks` - Create task
-- `PUT /tasks/{id}` - Update task
-- `PATCH /tasks/{id}/status` - Change status
-- `DELETE /tasks/{id}` - Delete task
-
-## 🚄 Development Workflow
-
-1. **Make changes** to code
-2. **Run tests** to verify
-3. **Test manually** in browser
-4. **Deploy** when ready
-
-### Hot Reload
-- Backend: Changes auto-reload with `--reload` flag
-- Frontend: Changes auto-refresh in browser
-
-## 📦 Deployment
-
-### Docker
-```bash
-docker-compose up -d
+```
+            ┌────────────────────────────┐
+            │  Browser (React 19 SPA)    │
+            │  - HTTP-only cookie holds  │
+            │    JWT, never JS-readable  │
+            └──────────────┬─────────────┘
+                           │ fetch (credentials: include)
+                           ▼
+            ┌────────────────────────────┐
+            │  FastAPI                   │
+            │  - CORS scoped to FRONTEND │
+            │  - get_current_user        │
+            │     decorator on routes    │
+            │  - service layer enforces  │
+            │     user_id on every query │
+            └──────────────┬─────────────┘
+                           │
+                           ▼
+                     SQLite (or Postgres)
 ```
 
-### Manual
-```bash
-# Backend
-cd backend
-pip install -r requirements.txt
-python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+Full details in [`_bmad-output/planning-artifacts/architecture.md`](_bmad-output/planning-artifacts/architecture.md).
 
-# Frontend
-cd frontend
-npm install
-npm run build
-npm run preview
+## Documentation map
+
+| Document | What it covers |
+|---|---|
+| [**PRD**](_bmad-output/planning-artifacts/prd.md) | Vision, target users, FRs, NFRs, journeys |
+| [**Architecture**](_bmad-output/planning-artifacts/architecture.md) | Stack, API contract, schema, deploy story |
+| [**UX Spec**](_bmad-output/planning-artifacts/ux-design-specification.md) | Wireframes, interaction details, design principles |
+| [**Epics & Stories**](_bmad-output/planning-artifacts/epics.md) | 3 epics, 9 stories with Given/When/Then ACs |
+| [**Implementation Readiness**](_bmad-output/planning-artifacts/implementation-readiness-report-2026-04-29.md) | Gap analysis run before coding started |
+| [**Coverage report**](_bmad-output/qa-reports/coverage-report.md) | Per-file numbers, gates, exclusions |
+| [**Accessibility audit**](_bmad-output/qa-reports/accessibility-report.md) | WCAG AA, axe-core in CI, Lighthouse |
+| [**Performance audit**](_bmad-output/qa-reports/performance-report.md) | Lighthouse, Core Web Vitals, bundle |
+| [**Security review**](_bmad-output/qa-reports/security-review.md) | OWASP Top 10 walkthrough, findings |
+| [**AI integration log**](_bmad-output/qa-reports/ai-integration-log.md) | What AI was used for, prompts, limitations |
+| [**BMAD process**](_bmad-output/qa-reports/bmad-process.md) | How the methodology shaped the build |
+
+## Environment configuration
+
+`.env` files are provided in `backend/` and `frontend/`. Templates in `.env.example`.
+
+| Var | Default (dev) | Notes |
+|---|---|---|
+| `DATABASE_URL` | `sqlite:///app.db` (local) / `sqlite:////data/app.db` (Docker) | Postgres URL works too |
+| `SECRET_KEY` | `dev-secret-change-me` | **Must rotate before prod** — see security review |
+| `FRONTEND_ORIGIN` | `http://localhost:5173` | CORS allow-origin |
+| `VITE_API_URL` | `http://localhost:8000` | Embedded into frontend bundle at build time in `prod` profile |
+
+## Health checks
+
+- Backend: `GET /health` returns `{"status":"ok"}`
+- Container `HEALTHCHECK` directives in both Dockerfiles
+- `docker-compose ps` shows health status; downstream services use `condition: service_healthy`
+
+## Common operations
+
+```bash
+# Reset the database (dev)
+rm backend/app.db
+docker-compose --profile dev restart backend
+
+# Tail logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# Run a backend shell
+docker-compose --profile dev exec backend bash
+
+# Re-run all tests from scratch
+cd backend && python3 -m pytest tests/
+cd ../frontend && npm test && npm run test:e2e
 ```
 
-### Production Checklist
-- [ ] Change `SECRET_KEY` in backend/.env
-- [ ] Set `FRONTEND_ORIGIN` to your domain
-- [ ] Use PostgreSQL instead of SQLite
-- [ ] Configure HTTPS/SSL
-- [ ] Set up environment variables securely
-- [ ] Run tests before deploying
-- [ ] Monitor logs and errors
+## Troubleshooting
 
-## 🆘 Troubleshooting
-
-### "email-validator not installed"
+**`ImportError: email-validator is not installed`**
+The container was built before `email-validator` landed in `requirements.txt`. Rebuild without cache:
 ```bash
-pip3 install 'pydantic[email]' email-validator
-# Or rebuild Docker: docker-compose build --no-cache
-```
-
-### Port already in use
-```bash
-# Backend (8000)
-lsof -ti:8000 | xargs kill -9
-
-# Frontend (5173)
-lsof -ti:5173 | xargs kill -9
-
-# Or use different ports
-```
-
-### Tests failing
-```bash
-# Reinstall dependencies
-pip3 install -r requirements.txt
-cd frontend && npm install
-
-# Run tests
-python3 -m pytest tests/ -v
-npm test
-```
-
-### Docker issues
-```bash
-# Rebuild without cache
-docker-compose build --no-cache
-
-# Clean start
 docker-compose down -v
-docker-compose up
+docker-compose build --no-cache
+docker-compose --profile dev up
 ```
 
-See [SETUP.md](./SETUP.md) and [DOCKER_GUIDE.md](./DOCKER_GUIDE.md) for more troubleshooting.
-
-## 📊 Test Coverage
-
-```
-Backend Tests:          18 PASSED ✅
-├─ Authentication      7 tests
-└─ Task Management    11 tests
-
-Frontend Tests:         46 PASSED ✅
-├─ LoginPage          4 tests
-├─ BoardPage         12 tests
-├─ BoardColumn       10 tests
-├─ TaskCard          12 tests
-└─ AuthContext        7 tests
-
-TOTAL:                64 PASSED ✅
+**Vite isn't picking up file changes**
+Common Docker-on-Mac issue with file watchers. Restart the frontend container:
+```bash
+docker-compose --profile dev restart frontend
 ```
 
-## 🎯 Next Steps
+**`tasks.filter is not a function`**
+Old `api.ts` cached in browser. Hard-refresh (`Cmd+Shift+R`).
 
-1. ✅ Setup complete - all tests passing
-2. 🚀 Run locally: `docker-compose up` or see QUICKSTART.md
-3. 📝 Read SETUP.md for detailed instructions
-4. 🔧 Check DOCKER_GUIDE.md for Docker troubleshooting
-5. 📚 Review TEST_SUMMARY.md for test details
+**Tailwind utility classes not applying**
+Check `frontend/src/index.css` uses `@import "tailwindcss";` (v4 syntax), not the v3 `@tailwind base; ...` directives.
 
-## 📖 Learn More
+**Login returns 401 even with correct credentials**
+You probably haven't signed up yet. Click "Sign up" at the bottom of the login form.
 
-- [FastAPI Documentation](https://fastapi.tiangfeudoc/)
-- [React Documentation](https://react.dev/)
-- [SQLModel Documentation](https://sqlmodel.tiangou.io/)
-- [Docker Documentation](https://docs.docker.com/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs/)
+## Contributing
 
-## 📞 Support
-
-For issues or questions:
-1. Check [SETUP.md](./SETUP.md) for troubleshooting
-2. Check [DOCKER_GUIDE.md](./DOCKER_GUIDE.md) for Docker issues
-3. Review [TEST_SUMMARY.md](./TEST_SUMMARY.md) for test information
-4. Read error logs: `docker-compose logs -f`
-
-## 📄 License
-
-Built with the BMAD Methodology:
-- Phase 1: Specifications (PRD, Architecture, Epics/Stories)
-- Phase 2: Backend Implementation + Integration Tests
-- Phase 3: Frontend Implementation + Component Tests
+This is an assessment artifact — no contribution flow. If you fork it, the BMAD specs in `_bmad-output/planning-artifacts/` are the source of truth; update them before changing behaviour, not after.
 
 ---
 
-**Last Updated**: April 30, 2026
-**Status**: Production Ready ✅
-**Test Coverage**: 64/64 tests passing ✅
+Built with the BMAD Methodology · React 19 · FastAPI · Tailwind 4 · Playwright · Docker

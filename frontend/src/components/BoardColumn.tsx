@@ -91,8 +91,8 @@ export function BoardColumn({
 
       <div className="flex-1 px-3 pb-3 space-y-2 min-h-[200px]">
         {tasks.length === 0 ? (
-          <div className="flex items-center justify-center h-32 border-2 border-dashed border-gray-200 rounded-lg">
-            <p className="text-sm text-gray-400">
+          <div className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg">
+            <p className="text-sm text-gray-500">
               {isDragOver ? 'Drop here' : 'No tasks'}
             </p>
           </div>
@@ -108,10 +108,11 @@ export function BoardColumn({
           <input
             type="text"
             name="new-task"
+            aria-label="Add a new task"
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
             placeholder="+ Add a task"
-            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
           />
         </form>
       )}

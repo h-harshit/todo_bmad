@@ -100,7 +100,7 @@ describe('BoardPage', () => {
       id: '1', title: 'Task 1', status: 'in_progress', user_id: '1', created_at: '', updated_at: '',
     });
 
-    const { container } = renderBoardPage();
+    renderBoardPage();
 
     await waitFor(() => {
       expect(screen.getByText('Task 1')).toBeInTheDocument();

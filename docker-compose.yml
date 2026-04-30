@@ -97,7 +97,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     environment:
-      DATABASE_URL: sqlite:///:memory:
+      DATABASE_URL: "sqlite:///:memory:"
       SECRET_KEY: test-secret
       FRONTEND_ORIGIN: http://localhost:5173
     command: ["python", "-m", "pytest", "tests/", "-v"]

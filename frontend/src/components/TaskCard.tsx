@@ -39,6 +39,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
       <div className="p-3 bg-white border-2 border-blue-400 rounded-lg shadow-sm">
         <input
           type="text"
+          aria-label="Edit task title"
           value={editTitle}
           onChange={(e) => setEditTitle(e.target.value)}
           onKeyDown={(e) => {

@@ -126,7 +126,7 @@ export function BoardPage() {
 
       <main className="max-w-7xl mx-auto px-6 py-6">
         {loading ? (
-          <div className="text-center py-16 text-gray-400">Loading…</div>
+          <div className="text-center py-16 text-gray-600">Loading…</div>
         ) : (
           <>
             <div className="mb-6">

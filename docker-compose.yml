@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: sqlite:////data/app.db
+      SECRET_KEY: your-secret-key-change-in-production
+      FRONTEND_ORIGIN: http://localhost:5173
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - backend_data:/data
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  backend_data:

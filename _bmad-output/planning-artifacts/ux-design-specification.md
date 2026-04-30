@@ -3,7 +3,7 @@ stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-core-experience',
 inputDocuments: ['_bmad-output/planning-artifacts/prd.md', '_bmad-output/planning-artifacts/architecture.md', '_bmad-output/planning-artifacts/epics.md']
 ---
 
-# UX Design Specification — todo_bmad
+# UX Design Specification — ToDo
 
 **Author:** Harshit
 **Date:** 2026-04-29
@@ -14,7 +14,7 @@ inputDocuments: ['_bmad-output/planning-artifacts/prd.md', '_bmad-output/plannin
 
 ### Project Vision
 
-todo_bmad is a personal task management application built on a philosophy of **deliberate restraint**. Rather than adding features, this app removes the complexity that plagues mainstream task tools. It serves a single authenticated user, offering a three-column Kanban board (Todo, In Progress, Done) for managing personal work. The differentiator is simplicity: no collaboration overhead, no notifications, no integrations—just an app that does one thing exceptionally well.
+ToDo is a personal task management application built on a philosophy of **deliberate restraint**. Rather than adding features, this app removes the complexity that plagues mainstream task tools. It serves a single authenticated user, offering a three-column Kanban board (Todo, In Progress, Done) for managing personal work. The differentiator is simplicity: no collaboration overhead, no notifications, no integrations—just an app that does one thing exceptionally well.
 
 ### Target Users
 
@@ -29,7 +29,7 @@ todo_bmad is a personal task management application built on a philosophy of **d
 
 1. **Board-First UX:** The board must be the primary, immediate view after login. No task detail views, no nested navigation.
 2. **Radical Simplicity:** Every UI element must justify its existence. Resist feature creep and design flourishes.
-3. **Click-Friendly Interactions:** No drag-and-drop (trackpad friction). Task movement via buttons/dropdowns only.
+3. **Drag-and-Drop Interactions:** Task movement between columns is performed by dragging the card and dropping it on the destination column. Drop targets show a visual ring while hovering. Edit and delete remain on a per-card hover menu.
 4. **Visual Clarity with Minimal Elements:** Three columns and task cards must create an immediately obvious layout with no learning curve.
 5. **Instant Feedback Without Spinners:** Operations (create, move, edit, delete) must provide seamless visual feedback with zero-delay re-fetch.
 
@@ -46,7 +46,7 @@ todo_bmad is a personal task management application built on a philosophy of **d
 
 ### Defining Experience
 
-todo_bmad's core experience centers on **viewing and managing a personal task board**. The primary user action is moving tasks between columns to track progress. Creating and editing tasks are secondary but equally important. The experience must feel frictionless—users think in terms of "move this task to Done," not "navigate to dialog, update field, save."
+ToDo's core experience centers on **viewing and managing a personal task board**. The primary user action is moving tasks between columns to track progress. Creating and editing tasks are secondary but equally important. The experience must feel frictionless—users think in terms of "move this task to Done," not "navigate to dialog, update field, save."
 
 ### Platform Strategy
 
@@ -108,7 +108,7 @@ Users should feel **in control and capable**. When moving a task or creating one
 ┌─────────────────────────────────┐
 │                                 │
 │                                 │
-│           todo_bmad             │
+│           ToDo             │
 │                                 │
 │    ┌─────────────────────┐     │
 │    │ Email/Username      │     │
@@ -143,7 +143,7 @@ Users should feel **in control and capable**. When moving a task or creating one
 **Content:**
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  todo_bmad          [+ Create Task]          [Log Out]         │
+│  ToDo          [+ Create Task]          [Log Out]         │
 ├────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐        │
@@ -177,7 +177,7 @@ Users should feel **in control and capable**. When moving a task or creating one
 **Content:**
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  todo_bmad          [+ Create Task]          [Log Out]         │
+│  ToDo          [+ Create Task]          [Log Out]         │
 ├────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐        │
@@ -219,54 +219,47 @@ Users should feel **in control and capable**. When moving a task or creating one
 
 ### 4. Task Interactions
 
-#### 4a. Task Card - Move Dropdown
+#### 4a. Task Card - Drag and Drop to Move
 
-**When user clicks [↓] on a task card:**
+**When user wants to move a task between columns:**
 
 ```
-┌──────────┐
-│ Task     │
-│ Title    │
-│ [↓]  [⋯] │  ← User clicks [↓]
-└──────────┘
-
-Dropdown appears:
-┌─────────────────────┐
-│ Move to In Progress  │
-│ Move to Done        │
-└─────────────────────┘
+TODO column          IN PROGRESS column
+┌──────────┐         ┌────────────────┐
+│ Task A   │ ───────►│  (drag over)   │
+└──────────┘         │  blue ring on  │
+                     │  drop target   │
+                     └────────────────┘
 ```
 
 **Specifications:**
-- Click [↓] to reveal dropdown menu
-- Shows only other columns (if currently in TODO, shows "Move to In Progress" and "Move to Done")
-- Click on option → task moves instantly to that column
-- Dropdown closes, card moves with instant visual feedback
-- No confirmation dialog
+- Cards are draggable (`cursor: grab`, becomes `grabbing` while held). The dragged card shows reduced opacity and a slight rotation for visual feedback.
+- Any column is a valid drop target. While a card is dragged over a column, the column highlights with a blue ring and the empty-state message changes to "Drop here".
+- Releasing on a column moves the task to that column's status. The task position updates optimistically; if the API call fails, the move is rolled back and an error banner appears.
+- No confirmation dialog. Dropping on the source column is a no-op.
 
-#### 4b. Task Card - Edit/Delete Menu
+#### 4b. Task Card - Hover Menu (Edit / Delete)
 
-**When user clicks [⋯] on a task card:**
+**The action menu (⋯) is hidden by default and appears on card hover:**
 
 ```
-┌──────────┐
-│ Task     │
-│ Title    │
-│ [↓]  [⋯] │  ← User clicks [⋯]
-└──────────┘
+On hover:
+┌─────────────────┐
+│ Task title  [⋯] │ ← Click [⋯]
+└─────────────────┘
 
-Menu appears:
-┌──────────┐
-│ Edit     │
-│ Delete   │
-└──────────┘
+Menu opens:
+       ┌─────────┐
+       │ Edit    │
+       │ Delete  │
+       └─────────┘
 ```
 
 **Specifications:**
-- Click [⋯] to reveal menu
-- "Edit" → Title becomes editable inline (text field, press Enter to save, Esc to cancel)
-- "Delete" → Confirmation modal appears: "Delete this task?" with [Confirm] and [Cancel] buttons
-- After delete confirmation → Task disappears instantly
+- The menu trigger (⋯) only fades in when the card is hovered, keeping the resting state clean.
+- "Edit" → Title becomes an inline text field. Save / Cancel buttons appear; Enter saves and Escape cancels. Clicking the title directly also enters edit mode.
+- "Delete" → Confirmation modal: "Delete task?" with the task title shown and [Cancel] / [Delete] buttons. The destructive action is on the right and uses red styling.
+- After delete confirmation → Task disappears instantly.
 
 #### 4c. Task Title - Edit Mode
 
@@ -365,7 +358,7 @@ After typing and pressing Enter:
 ### Typography
 
 - **Font Family:** Clean, sans-serif (system default or simple web font like Inter, Roboto)
-- **Header/Title:** Larger, clean (e.g., 24px for "todo_bmad", 16px for column headers)
+- **Header/Title:** Larger, clean (e.g., 24px for "ToDo", 16px for column headers)
 - **Task Title:** Medium size (14-16px), readable at a glance
 - **Labels/Buttons:** Consistent, 14-16px
 - **Error Messages:** Small (12px), clear red color

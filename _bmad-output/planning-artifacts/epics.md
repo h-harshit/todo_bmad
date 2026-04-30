@@ -3,31 +3,36 @@ stepsCompleted: ['step-01-validate-prerequisites', 'step-02-design-epics', 'step
 inputDocuments: ['_bmad-output/planning-artifacts/prd.md', '_bmad-output/planning-artifacts/architecture.md']
 ---
 
-# todo_bmad - Epic Breakdown
+# ToDo - Epic Breakdown
 
 ## Overview
 
-This document provides the complete epic and story breakdown for todo_bmad, decomposing the requirements from the PRD and Architecture into implementable stories.
+This document provides the complete epic and story breakdown for ToDo, decomposing the requirements from the PRD and Architecture into implementable stories.
 
 ## Requirements Inventory
 
 ### Functional Requirements
 
-FR1: User can log in using credentials (username/email and password)
-FR2: User can log out, ending their session
-FR3: System maintains a persistent session across browser refreshes
-FR4: Unauthenticated users are automatically redirected to the login page
-FR5: Authenticated user can view their personal task board organised into three columns: Todo, In Progress, Done
-FR6: System displays an empty state in each column when no tasks are present
-FR7: Board state persists between sessions — tasks are not lost when the user closes the browser
-FR8: User can create a new task by providing a title
-FR9: User can view all their tasks, each displayed in its current column
-FR10: User can move a task from any column to any other column
-FR11: User can edit the title of an existing task
-FR12: User can delete a task
-FR13: Task deletion is permanent — no undo or recovery mechanism required
-FR14: All board and task routes require authentication — unauthenticated access is blocked
-FR15: User is redirected to the board immediately after successful login
+FR1: User can sign up with an email and password to create an account
+FR2: User can log in using credentials (email and password)
+FR3: User can log out, ending their session
+FR4: System maintains a persistent session across browser refreshes via HTTP-only cookies
+FR5: Unauthenticated users are automatically redirected to the login page
+FR6: Login screen toggles between Log In and Sign Up modes via a single link
+FR7: Authenticated user can view their personal task board organised into three columns: To do, In progress, Done
+FR8: Each column displays a task count badge and a colour-coded accent (gray / blue / green)
+FR9: System displays an empty state in each column when no tasks are present
+FR10: Board state persists between sessions — tasks are not lost when the user closes the browser
+FR11: User can create a new task by providing a title (input only available in the To do column)
+FR12: User can view all their tasks, each displayed in its current column
+FR13: User can move a task from any column to any other column by dragging the card and dropping it on the destination column
+FR14: Drop targets provide visual feedback (highlighted ring) while a card is being dragged over them
+FR15: Task moves are applied optimistically; if the server rejects the move, the UI rolls back and surfaces an error
+FR16: User can edit the title of an existing task by clicking it (inline edit with Save / Cancel, plus Enter / Escape shortcuts)
+FR17: User can delete a task via a per-card menu, confirmed through a modal dialog
+FR18: Task deletion is permanent — no undo or recovery mechanism required
+FR19: All board and task routes require authentication — unauthenticated access is blocked
+FR20: User is redirected to the board immediately after successful login or signup
 
 ### NonFunctional Requirements
 
@@ -201,15 +206,26 @@ Users can securely log in, maintain their session across refreshes, and are bloc
 ### Story 2.1: Backend Authentication API
 
 As a developer,
-I want login, logout, and session-check endpoints implemented with JWT HTTP-only cookie authentication,
+I want signup, login, logout, and session-check endpoints implemented with JWT HTTP-only cookie authentication,
 So that the frontend can securely authenticate users without storing tokens in accessible browser storage.
 
 **Acceptance Criteria:**
 
+**Given** a `POST /auth/signup` request with `{"email": "...", "password": "..."}` and an email that does not yet exist
+**When** the endpoint processes the request
+**Then** it creates a new user with a bcrypt-hashed password
+**And** returns HTTP 201 with `{"id": "...", "email": "..."}`
+**And** sets the `access_token` cookie so the user is logged in immediately
+
+**Given** a `POST /auth/signup` request with an email that already exists
+**When** the endpoint processes the request
+**Then** it returns HTTP 409 with `{"detail": "Email already registered"}`
+**And** no user is created and no cookie is set
+
 **Given** a `POST /auth/login` request with `{"email": "...", "password": "..."}` and valid credentials
 **When** the endpoint processes the request
 **Then** it returns HTTP 200 with a JSON body `{"id": "...", "email": "..."}` (no password field)
-**And** sets an HTTP-only, Secure, SameSite=Lax cookie named `access_token` containing a signed JWT
+**And** sets an HTTP-only, SameSite=Lax cookie named `access_token` containing a signed JWT
 **And** the JWT payload includes `sub` (user email) and `exp` (expiry, configurable via env)
 
 **Given** a `POST /auth/login` request with invalid credentials
@@ -245,7 +261,7 @@ So that the frontend can securely authenticate users without storing tokens in a
 ### Story 2.2: Frontend Authentication UI and Session Management
 
 As a user,
-I want to log in with my credentials, have my session persist across browser refreshes, and be automatically redirected to the login page when not authenticated,
+I want to sign up or log in with my credentials, have my session persist across browser refreshes, and be automatically redirected to the login page when not authenticated,
 So that I can securely access my personal board without re-entering credentials on every visit.
 
 **Acceptance Criteria:**
@@ -254,15 +270,27 @@ So that I can securely access my personal board without re-entering credentials 
 **When** the `AuthContext` initialises (calls `GET /auth/me` via `apiFetch`)
 **Then** I am redirected to `/login`
 
-**Given** I am on the `/login` page
+**Given** I am on the `/login` page in Log In mode
 **When** I enter valid credentials and submit the form
 **Then** `POST /auth/login` is called via `apiFetch` with `credentials: 'include'`
 **And** on success I am redirected to `/board`
 **And** the `AuthContext` user state is populated with the returned user object
 
 **Given** I am on the `/login` page
-**When** I enter invalid credentials and submit
-**Then** an error message is displayed below the form (e.g. "Invalid email or password")
+**When** I click the "Sign up" link below the form
+**Then** the form switches to Sign Up mode (button label and copy update accordingly)
+**And** any prior error message is cleared
+
+**Given** I am on the `/login` page in Sign Up mode
+**When** I submit a valid email and password
+**Then** `POST /auth/signup` is called via `apiFetch` with `credentials: 'include'`
+**And** on success I am logged in and redirected to `/board`
+**And** if the email is already registered, a clear error is shown and I remain on the page
+
+**Given** I am on the `/login` page in either mode
+**When** the API returns a non-2xx response
+**Then** the API client throws an error
+**And** an error message is displayed below the form (e.g. "Invalid email or password" or "Could not create account")
 **And** I remain on the login page
 
 **Given** I am logged in and refresh the browser
@@ -396,32 +424,40 @@ So that I can add work items to my board without leaving the page.
 
 ---
 
-### Story 3.4: Move Task Between Columns
+### Story 3.4: Move Task Between Columns (Drag and Drop)
 
 As a user,
-I want to move a task from any column to any other column,
-So that I can track the progress of my work.
+I want to drag a task card and drop it onto any column,
+So that I can update its status quickly without opening menus.
 
 **Acceptance Criteria:**
 
 **Given** I am viewing a task card
-**When** I click a "Move to" control (button or dropdown) on the task card
-**Then** I can select a target column: Todo, In Progress, or Done (only columns other than the current one are shown as options)
+**When** I press and hold the card with my pointer
+**Then** the card becomes draggable (cursor changes to grabbing, card shows reduced opacity and slight rotation as a drag affordance)
 
-**Given** I select a target column
-**When** the move action triggers
-**Then** `PATCH /tasks/{id}/status` is called with the appropriate status value (`todo`, `in_progress`, or `done`)
-**And** on success the task list is re-fetched and the task appears in the target column
-**And** the task disappears from its previous column
+**Given** I am dragging a card over a column other than its current one
+**When** my pointer is over the column
+**Then** the column highlights as a drop target (blue ring) and the empty-state message reads "Drop here"
+
+**Given** I release the card on a target column
+**When** the drop occurs
+**Then** the task immediately moves into the target column in the UI (optimistic update)
+**And** `PATCH /tasks/{id}/status` is called with the corresponding status value (`todo`, `in_progress`, or `done`)
+**And** on success the card stays in the new column with the server-confirmed task data
+
+**Given** I drop a card on the same column it came from
+**When** the drop occurs
+**Then** no API call is made and no state changes
 
 **Given** a task is in the Done column
-**When** I move it back to In Progress
-**Then** it moves correctly — all column transitions are reversible
+**When** I drag it back to In Progress
+**Then** the move succeeds — all column transitions are reversible
 
 **Given** the move API call fails (network error or 4xx)
 **When** the error response is received
-**Then** the task remains in its original column
-**And** an error message is shown to the user
+**Then** the optimistic update is rolled back and the task returns to its original column
+**And** an error banner is shown to the user
 
 ---
 

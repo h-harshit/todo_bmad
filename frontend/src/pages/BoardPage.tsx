@@ -100,7 +100,7 @@ export function BoardPage() {
               T
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900 leading-tight">todo_bmad</h1>
+              <h1 className="text-lg font-bold text-gray-900 leading-tight">ToDo</h1>
               {user && <p className="text-xs text-gray-500">{user.email}</p>}
             </div>
           </div>

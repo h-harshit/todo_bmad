@@ -24,7 +24,7 @@ describe('LoginPage', () => {
 
   it('renders login form', () => {
     renderLoginPage();
-    expect(screen.getByText('todo_bmad')).toBeInTheDocument();
+    expect(screen.getByText('ToDo')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();

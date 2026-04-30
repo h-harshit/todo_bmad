@@ -16,7 +16,7 @@ export function LoginPage() {
     navigate('/board', { replace: true });
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -35,17 +35,19 @@ export function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-2xl font-bold shadow-lg mb-4">
-            T
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">todo_bmad</h1>
-          <p className="text-sm text-gray-500 mt-2">
-            {isSignup ? 'Create your account to get started' : 'Welcome back, log in to continue'}
-          </p>
-        </div>
-
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+          <div className="text-center mb-7">
+            <div className="inline-flex items-center gap-2.5 mb-2">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-base font-bold shadow-sm">
+                T
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">ToDo</h1>
+            </div>
+            <p className="text-sm text-gray-500">
+              {isSignup ? 'Create your account to get started' : 'Welcome back, log in to continue'}
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">

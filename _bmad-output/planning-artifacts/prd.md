@@ -15,7 +15,7 @@ brainstormingCount: 0
 projectDocsCount: 0
 ---
 
-# Product Requirements Document - todo_bmad
+# Product Requirements Document - ToDo
 
 **Author:** Harshit
 **Date:** 2026-04-29
@@ -105,7 +105,7 @@ The differentiator is deliberate restraint. Where competing tools add features t
 
 He scans In Progress: two tasks. One is done — he moves it to Done. He picks the next item from Todo, moves it to In Progress. He adds a new task that just came up: types the title, saves. Done in fifteen seconds. He closes the tab. The board will be there tomorrow, unchanged.
 
-**Reveals:** persistent session state, fast board render, click-to-move or drag-and-drop interaction, inline task creation.
+**Reveals:** persistent session state, fast board render, drag-and-drop interaction between columns, inline task creation.
 
 ---
 
@@ -167,30 +167,35 @@ He creates his first task. Then another. Then moves one. Within two minutes he u
 
 ### Authentication & Session Management
 
-- **FR1:** User can log in using credentials (username/email and password)
-- **FR2:** User can log out, ending their session
-- **FR3:** System maintains a persistent session across browser refreshes
-- **FR4:** Unauthenticated users are automatically redirected to the login page
+- **FR1:** User can sign up with an email and password to create an account
+- **FR2:** User can log in using credentials (email and password)
+- **FR3:** User can log out, ending their session
+- **FR4:** System maintains a persistent session across browser refreshes via HTTP-only cookies
+- **FR5:** Unauthenticated users are automatically redirected to the login page
+- **FR6:** Login screen toggles between Log In and Sign Up modes via a single link
 
 ### Task Board
 
-- **FR5:** Authenticated user can view their personal task board organised into three columns: Todo, In Progress, Done
-- **FR6:** System displays an empty state in each column when no tasks are present
-- **FR7:** Board state persists between sessions — tasks are not lost when the user closes the browser
+- **FR7:** Authenticated user can view their personal task board organised into three columns: To do, In progress, Done
+- **FR8:** Each column displays a task count badge and a colour-coded accent (gray / blue / green)
+- **FR9:** System displays an empty state in each column when no tasks are present
+- **FR10:** Board state persists between sessions — tasks are not lost when the user closes the browser
 
 ### Task Management
 
-- **FR8:** User can create a new task by providing a title
-- **FR9:** User can view all their tasks, each displayed in its current column
-- **FR10:** User can move a task from any column to any other column
-- **FR11:** User can edit the title of an existing task
-- **FR12:** User can delete a task
-- **FR13:** Task deletion is permanent — no undo or recovery mechanism required
+- **FR11:** User can create a new task by providing a title (input is only available in the To do column)
+- **FR12:** User can view all their tasks, each displayed in its current column
+- **FR13:** User can move a task from any column to any other column by dragging the card and dropping it on the destination column
+- **FR14:** Drop targets provide visual feedback (highlighted ring) while a card is being dragged over them
+- **FR15:** Task moves are applied optimistically; if the server rejects the move, the UI rolls back and surfaces an error
+- **FR16:** User can edit the title of an existing task by clicking it (inline edit with Save / Cancel, plus Enter / Escape shortcuts)
+- **FR17:** User can delete a task via a per-card menu, confirmed through a modal dialog
+- **FR18:** Task deletion is permanent — no undo or recovery mechanism required
 
 ### Navigation & Routing
 
-- **FR14:** All board and task routes require authentication — unauthenticated access is blocked
-- **FR15:** User is redirected to the board immediately after successful login
+- **FR19:** All board and task routes require authentication — unauthenticated access is blocked
+- **FR20:** User is redirected to the board immediately after successful login or signup
 
 ## Non-Functional Requirements
 
